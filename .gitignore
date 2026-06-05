@@ -1,0 +1,8 @@
+*.old*
+BitNet/
+chroma_db/*
+documents/*
+old
+venv/
+__pycache__/
+.env
