@@ -13,31 +13,20 @@ from typing import List, Optional
 import requests
 from dotenv import load_dotenv
 
-# # LangChain
-# from langchain.text_splitter import RecursiveCharacterTextSplitter
-# from langchain_community.vectorstores import Chroma
-# from langchain_community.embeddings import HuggingFaceEmbeddings
-# from langchain.schema import Document
 
-# Por ESTAS (versão 1.x correta):
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings  
 from langchain_core.documents import Document
 
-# PyMuPDF4LLM — extração de PDF em Markdown (suporta tabelas e colunas)
 import pymupdf4llm
 
-# ---------------------------------------------------------------------------
-# Configuração
-# ---------------------------------------------------------------------------
 
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
 
-# Variáveis de ambiente com fallback
 PDF_FOLDER       = Path(os.getenv("PDF_FOLDER", "./documents"))
 CHROMA_DB_PATH   = Path(os.getenv("CHROMA_DB_PATH", "./chroma_db"))
 EMBED_MODEL      = os.getenv("EMBED_MODEL", "all-MiniLM-L6-v2")   # leve, ~80 MB
@@ -45,7 +34,6 @@ CHUNK_SIZE       = int(os.getenv("CHUNK_SIZE", "800"))
 CHUNK_OVERLAP    = int(os.getenv("CHUNK_OVERLAP", "200"))          # overlap vital para contexto
 TOP_K            = int(os.getenv("TOP_K", "4"))                    # chunks recuperados por query
 
-# Endpoint do bitnet.cpp (OpenAI-compatible via llama-server embutido)
 BITNET_ENDPOINT  = os.getenv("BITNET_ENDPOINT", "http://localhost:11434/v1/chat/completions")
 BITNET_MODEL     = os.getenv("BITNET_MODEL", "bitnet-b1.58-2B-4T")
 
@@ -99,45 +87,6 @@ def load_pdfs(folder: Path) -> List[Document]:
         raise RuntimeError("Nenhum documento foi carregado com sucesso.")
 
     return documents
-# def load_pdfs(folder: Path) -> List[Document]:
-#     """
-#     Lê todos os PDFs em `folder`, converte para Markdown usando pymupdf4llm
-#     (preserva tabelas, listas e estrutura), e retorna uma lista de Documents.
-#     """
-#     if not folder.exists():
-#         raise FileNotFoundError(f"Pasta não encontrada: {folder}")
-
-#     pdf_files = list(folder.glob("*.pdf"))
-#     if not pdf_files:
-#         raise ValueError(f"Nenhum arquivo PDF encontrado em: {folder}")
-
-#     logger.info(f"PDFs encontrados: {[f.name for f in pdf_files]}")
-
-#     documents: List[Document] = []
-
-#     for pdf_path in pdf_files:
-#         try:
-#             # pymupdf4llm extrai texto estruturado em Markdown — superior ao
-#             # PyPDFLoader simples para PDFs com tabelas, colunas e imagens captioned
-#             md_text = pymupdf4llm.to_markdown(str(pdf_path))
-
-#             if not md_text.strip():
-#                 logger.warning(f"PDF vazio ou ilegível: {pdf_path.name}")
-#                 continue
-
-#             documents.append(Document(
-#                 page_content=md_text,
-#                 metadata={"source": pdf_path.name, "path": str(pdf_path)}
-#             ))
-#             logger.info(f"Carregado: {pdf_path.name} ({len(md_text)} chars)")
-
-#         except Exception as e:
-#             logger.error(f"Erro ao ler {pdf_path.name}: {e}")
-
-#     if not documents:
-#         raise RuntimeError("Nenhum documento foi carregado com sucesso.")
-
-#     return documents
 
 
 # ---------------------------------------------------------------------------
